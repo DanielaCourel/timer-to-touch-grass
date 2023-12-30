@@ -3,8 +3,12 @@ import threading
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 import asyncio
+import warnings
 
-pause_event = threading.Event()
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
+pause_event = asyncio.Event()
 
 class ActivityManager:
     def __init__(self):
@@ -16,26 +20,25 @@ class ActivityManager:
         self.pause_timer = None
         self.suspend_time = 60
 
-    def pause_program(self):
+    async def pause_program(self):
         self.pause = True
         self.connect = False
         pause_event.set()
-        time.sleep(self.suspend_time)
+        await asyncio.sleep(self.suspend_time)
         self.pause = False
         self.pause_timer = None
 
-    def timer_of_activity(self):
+    async def timer_of_activity(self):
         while self.connect:
-            time.sleep(1)
+            await asyncio.sleep(1)
             self.timer_user += 1
             print("time1:", self.timer_user)
             if self.timer_user >= self.PAUSE_TIME:
-                self.pause_timer = threading.Thread(target=self.pause_program)
-                self.pause_timer.start()
+                await self.pause_program()  # Esperar a que pause_program termine
 
-    def time_without_activity(self):
+    async def time_without_activity(self):
         while self.connect:
-            time.sleep(1)
+            await asyncio.sleep(1)
             self.timer_inactive += 1
             print("time2:", self.timer_inactive)
             if self.timer_inactive >= 10:
@@ -43,37 +46,57 @@ class ActivityManager:
                 self.connect = False
                 self.timer_inactive = 0
                 self.timer_user = 0
-                pause_event.wait()
+                await pause_event.wait()
 
-    def have_interaction(self, *args):
+    async def have_interaction(self, *args):
         print("skdfjkasjdf")
         self.timer_inactive = 0
         if not self.connect and self.pause_timer is None:
             print("ahora acá debería llegar cuando haya actividad de nuevo...")
             self.connect = True
-            pause_event.clear()
+            await pause_event.clear()
 
-    async def start_listeners(self):
-        async def async_mouse_listener():
-            listener = MouseListener(on_move=self.have_interaction, on_click=self.have_interaction, on_scroll=self.have_interaction)
-            listener.start()
-            await asyncio.sleep(0.1)  # Permitir que el listener se inicie
-            listener.join()
+    async def on_move_event(self, x, y):
+        await self.have_interaction(x, y)
 
-        async def async_keyboard_listener():
-            listener = KeyboardListener(on_press=self.have_interaction)
-            listener.start()
-            await asyncio.sleep(0.1)  # Permitir que el listener se inicie
-            listener.join()
+    async def on_click_event(self, x, y, button, pressed):
+        await self.have_interaction(x, y, button, pressed)
 
-        await asyncio.gather(
-            async_mouse_listener(),
-            async_keyboard_listener()
+    async def on_scroll_event(self, x, y, dx, dy):
+        await self.have_interaction(x, y, dx, dy)
+
+    async def on_press_event(self, key):
+        await self.have_interaction(key)
+
+
+    async def mouse_listener(self):
+        listener = MouseListener(
+            on_move=self.on_move_event,
+            on_click=self.on_click_event,
+            on_scroll=self.on_scroll_event
         )
+        listener.start()
+        await asyncio.sleep(0.1)
+
+    async def keyboard_listener(self):
+        listener = KeyboardListener(on_press=self.on_press_event)
+        listener.start()
+        await asyncio.sleep(0.1)
+
 
     async def start(self):
-        asyncio.create_task(self.start_listeners())
-        await asyncio.sleep(0.1)
-        asyncio.create_task(self.time_without_activity())
-        asyncio.create_task(self.timer_of_activity())
-        
+        task_mouse = self.mouse_listener()
+        task_keyboard = self.keyboard_listener()
+
+        await asyncio.gather(task_mouse, task_keyboard)
+
+        # Esperar a que al menos una interacción ocurra para asegurarse de que los listeners estén activos
+        while self.connect:
+            if self.timer_inactive == 0:
+                break
+            await asyncio.sleep(0.1)
+
+        await asyncio.gather(
+            self.time_without_activity(), 
+            self.timer_of_activity()
+        )
