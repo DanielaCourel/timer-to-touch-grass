@@ -5,6 +5,7 @@ from pynput.keyboard import Listener as KeyboardListener
 
 pause_event = threading.Event()
 new_connection = threading.Event()
+inactive_event = threading.Event()
 
 class ActivityManager:
     def __init__(self):
@@ -13,7 +14,7 @@ class ActivityManager:
         self.timer_inactive = 0
         self.pause = False
         self.connect = True
-        self.PAUSE_TIME = 6
+        self.PAUSE_TIME = 1800
         self.pause_timer = None
 
     def pause_program(self):
@@ -23,7 +24,6 @@ class ActivityManager:
         self.connect = False
         pause_event.set()
         time.sleep(6)
-        print("termina el tiempo de pausa")
         self.pause = False
 
     def timer_of_activity(self):
@@ -42,14 +42,12 @@ class ActivityManager:
             print("time 2:", self.timer_inactive)
             if self.timer_inactive >= 300:
                 self.connect = False
-                self.timer_inactive = 0
-                self.timer_user = 0
+                inactive_event.set()
+                pause_event.set()
 
     def have_interaction(self, *args):
-        print("actividad")
         self.timer_inactive = 0
         if not self.pause and not self.connect:
-            print("llega alguna vez acá?")
             new_connection.set()
             self.connect = True
 
@@ -69,7 +67,7 @@ class ActivityManager:
         self.timer_user = 0
         self.timer_inactive = 0
         self.pause = False
-        self.pause_timer = None
-        self.thread1 = None
-        self.thread2 = None
+        new_connection.clear()
+        pause_event.clear()
+        inactive_event.clear()
         
