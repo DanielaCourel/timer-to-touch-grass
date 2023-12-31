@@ -53,37 +53,11 @@ class ActivityManager:
             new_connection.set()
             self.connect = True
 
-    def on_move_event(self, *args):
-        # Lógica para eventos de movimiento del mouse
-        print("11111111")
-        self.have_interaction()
-
-    def on_click_event(self, *args):
-        # Lógica para eventos de clic del mouse
-        print("22222222")
-        self.have_interaction()
-
-    def on_scroll_event(self, *args):
-        # Lógica para eventos de scroll del mouse
-        print("33333333")
-        self.have_interaction()
-
-    def on_press_event(self, *args):
-        # Lógica para eventos de presionar tecla
-        print("44444444")
-        self.have_interaction()
-
-    def start_mouse_listener(self):
-        mouse_listener = MouseListener(on_click=self.on_click_event, on_move=self.on_move_event, on_scroll=self.on_scroll_event)
-        mouse_listener.start()
-
-    def start_keyboard_listener(self):
-        keyboard_listener = KeyboardListener(on_press=self.on_press_event)
-        keyboard_listener.start()
-
     def start_listeners(self):
-        self.start_mouse_listener()
-        self.start_keyboard_listener()
+        mouse_listener = MouseListener(on_move=self.have_interaction, on_click=self.have_interaction, on_scroll=self.have_interaction)
+        keyboard_listener = KeyboardListener(on_press=self.have_interaction)
+        mouse_listener.start()
+        keyboard_listener.start()
 
     def start(self):
         thread1 = threading.Thread(target=self.timer_of_activity)
