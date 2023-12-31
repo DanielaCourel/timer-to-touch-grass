@@ -33,6 +33,9 @@ def show_message_with_countdown(message, duration):
         popup.after(1000, countdown, remaining)
 
     countdown(duration)
-    root.after(60000, root.quit)  # Terminar la ejecución después de 60 segundos
+    popup.after(duration * 1000, popup.destroy)  # Terminar la ejecución después de 6 segundos
+    root.after(duration * 1000, root.quit)
 
     root.mainloop()
+
+    print("debería terminar de ejecutarse el cartel")
