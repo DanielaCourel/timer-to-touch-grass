@@ -15,6 +15,7 @@ class ActivityManager:
         self.is_paused = False
         self.is_connected = True
         self.inactivity_threshold = 1800
+        self.pause_time = 60
         self.pause_timer = None
 
     def pause_program(self):
@@ -23,7 +24,7 @@ class ActivityManager:
             self.is_paused = True
             self.is_connected = False
             pause_event.set()
-            time.sleep(60)
+            time.sleep(self.pause_time)
             self.is_paused = False
         except Exception as e:
             print(f"Error during pause_program: {e}")
@@ -79,9 +80,11 @@ class ActivityManager:
         except Exception as e:
             print(f"Error during start_listeners: {e}")
 
-    def start(self):
+    def start(self, time_to_pause, time_of_pause):
         """Start the timers"""
         try:
+            self.inactivity_threshold = time_to_pause
+            self.pause_time = time_of_pause
             thread1 = threading.Thread(target=self.timer_of_activity)
             thread2 = threading.Thread(target=self.time_without_activity)
             thread1.start()
