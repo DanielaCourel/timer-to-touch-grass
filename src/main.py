@@ -2,7 +2,6 @@ from modules.ActivityManager import ActivityManager, pause_event, new_connection
 from interfaces.Message import show_message_with_countdown
 
 activity_manager = ActivityManager()
-pause_message = "Es hora de hacer una pausa. \n Levántate y estira las piernas por 1 min.\n"
 timer = 5 # Duranción en segundos del timer
 pause = 6  # Duración en segundos del mensaje
 
@@ -12,7 +11,7 @@ while True:
         activity_manager.start(timer, pause)
         pause_event.wait()
         if not inactive_event.is_set():
-            show_message_with_countdown(pause_message, pause)
+            show_message_with_countdown(pause)
         new_connection.wait()
     except Exception as e:
         print(f"Error in main loop: {e}")
