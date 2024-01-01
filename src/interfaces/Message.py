@@ -19,7 +19,9 @@ def show_message_with_countdown(message, duration):
     popup.geometry("900x200")  # Establecer el tamaño
     center_window(popup, 900, 200)  # Centrar la ventana
 
-    label = tk.Label(popup, text=message)
+    popup.configure(bg="red")
+
+    label = tk.Label(popup, text=message, fg="white", bg="red", font=("Verdana", 15))
     label.place(relx=0.5, rely=0.5, anchor=tk.CENTER)  # Centrar el texto
     label.config(justify=tk.CENTER)  # Alinear el texto al centro
 
@@ -28,7 +30,7 @@ def show_message_with_countdown(message, duration):
             root.deiconify()  # Mostrar la ventana principal
             popup.destroy()
             return
-        label['text'] = f"{message} - {remaining} segundos"
+        label['text'] = f"{message} {remaining} segundos"
         remaining -= 1
         popup.after(1000, countdown, remaining)
 
@@ -37,5 +39,3 @@ def show_message_with_countdown(message, duration):
     root.after(duration * 1000, root.quit)
 
     root.mainloop()
-
-    print("debería terminar de ejecutarse el cartel")
