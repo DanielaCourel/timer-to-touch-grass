@@ -2,7 +2,7 @@ import tkinter as tk
 
 def show_message_with_countdown(duration):
     #modificar esta linea para agregar listas de mensajes diferentes
-    message = "Es hora de hacer una pausa. \n Levántate y estira las piernas por 1 min.\n"
+    message = f"Es hora de hacer una pausa. \n Levántate y estira las piernas por {duration//60} min.\n"
 
     root = tk.Tk()
     root.withdraw()  # Ocultar la ventana principal
@@ -45,3 +45,21 @@ def show_message_with_countdown(duration):
     root.after(duration * 1000, root.quit)
 
     root.mainloop()
+
+#show_message_with_countdown("Hola, soy una ventana molesta", 5)
+
+
+
+"""     
+    código para modificar después ----ignorar-----
+    # Lista de rutas de archivos GIF
+    gif_paths = ["path/to/your/image1.gif", "path/to/your/image2.gif", "path/to/your/image3.gif"]
+    # Seleccionar aleatoriamente una ruta de GIF de la lista
+    selected_gif_path = random.choice(gif_paths)
+
+    # Cargar el GIF seleccionado
+    gif = tk.PhotoImage(file=selected_gif_path)
+
+    # Configurar una etiqueta con el GIF como fondo
+    background_label = tk.Label(popup, image=gif)
+    background_label.place(x=0, y=0, relwidth=1, relheight=1) """
