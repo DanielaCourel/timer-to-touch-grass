@@ -2,13 +2,13 @@ from modules.ActivityManager import ActivityManager, pause_event, new_connection
 from interfaces.Message import show_message_with_countdown
 
 activity_manager = ActivityManager()
-timer = 1800 # Duranción en segundos del timer
-pause = 60  # Duración en segundos del mensaje
+timer = 1500 # Duranción en segundos del timer
+pause = 300  # Duración en segundos del mensaje
+interactive = False
 
 while True:
     try:
-        activity_manager.stop_threads_and_reset()
-        activity_manager.start(timer, pause)
+        activity_manager.start(timer, pause, interactive)
         pause_event.wait()
         if not inactive_event.is_set():
             show_message_with_countdown(pause)

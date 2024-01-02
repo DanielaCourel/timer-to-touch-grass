@@ -42,14 +42,18 @@ class ActivityManager:
         except Exception as e:
             print(f"Error during timer_of_activity: {e}")
 
-    def time_without_activity(self):
+    def time_without_activity(self, interactive):
         """Timer for count the consecutive seconds between user interactions whit mouse or keyboard"""
         try:
             while self.is_connected:
                 time.sleep(1)
                 self.timer_inactive += 1
                 print("time 2:", self.timer_inactive)
-                if self.timer_inactive >= 300:
+                if interactive and self.timer_inactive >= 300:
+                    self.is_connected = False
+                    inactive_event.set()
+                    pause_event.set()
+                elif not interactive and self.timer_inactive >= 900:
                     self.is_connected = False
                     inactive_event.set()
                     pause_event.set()
@@ -80,13 +84,14 @@ class ActivityManager:
         except Exception as e:
             print(f"Error during start_listeners: {e}")
 
-    def start(self, time_to_pause, time_of_pause):
+    def start(self, time_to_pause, time_of_pause, interactive):
         """Start the timers"""
+        self.stop_threads_and_reset()
         try:
             self.inactivity_threshold = time_to_pause
             self.pause_time = time_of_pause
             thread1 = threading.Thread(target=self.timer_of_activity)
-            thread2 = threading.Thread(target=self.time_without_activity)
+            thread2 = threading.Thread(target=self.time_without_activity, args=(interactive,))
             thread1.start()
             thread2.start()
         except Exception as e:
